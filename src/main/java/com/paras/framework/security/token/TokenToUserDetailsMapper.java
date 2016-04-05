@@ -24,19 +24,30 @@ public class TokenToUserDetailsMapper {
         CurrentUserDetails details = new CurrentUserDetails();
         List<RoleAuthority> roles = new ArrayList<RoleAuthority>();
         
+        /**
+         * To make first come, first serve.
+         * So that in principals, id doesn't gets overridden by email if claims contains both.
+         */
+        boolean principalFound = false;
+        boolean nameFound = false;
+        
         for( String key : claims.keySet() ) {
             
-            if( isKeyPrincipal( key )) {
+            if( isKeyPrincipal( key ) && !principalFound ) {
                 details.setId( claims.get( key ));
+                principalFound = true;
+                
                 continue;
             }
             
-            if( isKeyName( key )) {
+            if( isKeyName( key ) && !nameFound ) {
                 details.setName( claims.get( key ));
+                nameFound = true;
+                
                 continue;
             }
             
-            if( isKeyRole( key )) {
+            if( isKeyRole( key ) ) {
                 roles.add( new RoleAuthority( claims.get( key )));
                 continue;
             }
